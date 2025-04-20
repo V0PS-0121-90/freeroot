@@ -18,7 +18,9 @@ fi
 if [ ! -e $ROOTFS_DIR/.installed ]; then
   echo "#######################################################################################"
   echo "#"
-  echo "#                                    Foxytoux INSTALLER"
+  echo "#                                       INSTALLER"
+  echo "#"
+  echo "#                               Installing Alpine Linux instead of Ubuntu"
   echo "#"
   echo "#                           Copyright (C) 2024, RecodeStudios.Cloud"
   echo "#"
@@ -31,10 +33,11 @@ case $install_alpine in
   [yY][eE][sS])
     wget --tries=$max_retries --timeout=$timeout --no-hsts -O /tmp/rootfs.tar.gz \
       "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/${ARCH_ALT}/alpine-minirootfs-latest-${ARCH_ALT}.tar.gz"
+    mkdir -p $ROOTFS_DIR
     tar -xf /tmp/rootfs.tar.gz -C $ROOTFS_DIR
     ;;
   *)
-    echo "Skipping Alpine Linux installation."
+    echo "Skipping Alpine installation."
     ;;
 esac
 
@@ -43,15 +46,8 @@ if [ ! -e $ROOTFS_DIR/.installed ]; then
   wget --tries=$max_retries --timeout=$timeout --no-hsts -O $ROOTFS_DIR/usr/local/bin/proot "https://raw.githubusercontent.com/foxytouxxx/freeroot/main/proot-${ARCH}"
 
   while [ ! -s "$ROOTFS_DIR/usr/local/bin/proot" ]; do
-    rm -rf $ROOTFS_DIR/usr/local/bin/proot
+    rm -f $ROOTFS_DIR/usr/local/bin/proot
     wget --tries=$max_retries --timeout=$timeout --no-hsts -O $ROOTFS_DIR/usr/local/bin/proot "https://raw.githubusercontent.com/foxytouxxx/freeroot/main/proot-${ARCH}"
-
-    if [ -s "$ROOTFS_DIR/usr/local/bin/proot" ]; then
-      chmod 755 $ROOTFS_DIR/usr/local/bin/proot
-      break
-    fi
-
-    chmod 755 $ROOTFS_DIR/usr/local/bin/proot
     sleep 1
   done
 
@@ -59,8 +55,8 @@ if [ ! -e $ROOTFS_DIR/.installed ]; then
 fi
 
 if [ ! -e $ROOTFS_DIR/.installed ]; then
-  printf "nameserver 1.1.1.1\nnameserver 1.0.0.1\n" > ${ROOTFS_DIR}/etc/resolv.conf
-  rm -rf /tmp/rootfs.tar.gz
+  echo -e "nameserver 1.1.1.1\nnameserver 1.0.0.1" > ${ROOTFS_DIR}/etc/resolv.conf
+  rm -f /tmp/rootfs.tar.gz
   touch $ROOTFS_DIR/.installed
 fi
 
@@ -79,4 +75,4 @@ display_gg
 
 $ROOTFS_DIR/usr/local/bin/proot \
   --rootfs="${ROOTFS_DIR}" \
-  -0 -w "/root" -b /dev -b /sys -b /proc -b /etc/resolv.conf --kill-on-exit
+  -0 -w /root -b /dev -b /sys -b /proc -b /etc/resolv.conf --kill-on-exit
